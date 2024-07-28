@@ -19,15 +19,21 @@
             overrides = import "${inputs.cabal-audit}/nix/haskell-overlay.nix" {inherit hlib;};
           };
         gas = haskellPackages.callCabal2nix "github-action-scan" ./. { };
+        staticLinking = hlib.appendConfigureFlags [
+          "--ghc-option=-optl=-static"
+          "--extra-lib-dirs=${pkgs.gmp6.override { withStatic = true; }}/lib"
+          "--extra-lib-dirs=${pkgs.zlib.static}/lib"
+          "--extra-lib-dirs=${pkgs.libffi.overrideAttrs (old: { dontDisableStatic = true; })}/lib"
+        ];
       in rec {
         packages.github-action-scan = gas;
-        packages.github-action-scan-static = pkgs.haskell.lib.justStaticExecutables gas;
+        packages.github-action-scan-static = staticLinking (pkgs.haskell.lib.justStaticExecutables gas);
 
         defaultPackage = packages.github-action-scan;
 
         devShell = pkgs.mkShell {
           buildInputs = with haskellPackages; [
-            haskell-language-server
+            # haskell-language-server
             ghcid
             cabal-install
             cabal-audit
