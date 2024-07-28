@@ -19,7 +19,7 @@ jobs:
     - uses: DeterminateSystems/magic-nix-cache-action@main
     - uses: docker/setup-buildx-action@v2
     - run: nix build -L
-    - run: nix build -L '.#packages.x86_64-linux.wgithub-action-scan-image'
+    - run: nix build -L '.#packages.x86_64-linux.github-action-scan-image'
     - run: nix flake check
     - name: Extract tag name
       shell: bash
