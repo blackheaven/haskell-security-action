@@ -5,8 +5,6 @@ Scan for vulnerabilities and create advisories on GitHub.
 ## Usage
 
 ```yaml
-name: security scan
-
 name: Scan for vulnerabilities
 on:
   # Scan for each push event on your protected branch
@@ -28,7 +26,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Haskell Security Action
-        uses: blackheaven/haskell-security-action
+        uses: blackheaven/haskell-security-action@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
