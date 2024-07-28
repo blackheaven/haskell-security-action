@@ -15,7 +15,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
           hlib = pkgs.haskell.lib.compose;
-          haskellPackages = pkgs.haskell.packages.ghc982.override {
+          haskellPackages = pkgs.haskellPackages.override {
             overrides = import "${inputs.cabal-audit}/nix/haskell-overlay.nix" {inherit hlib;};
           };
         gas = haskellPackages.callCabal2nix "github-action-scan" ./. { };
@@ -27,7 +27,7 @@
 
         devShell = pkgs.mkShell {
           buildInputs = with haskellPackages; [
-            pkgs.haskell.packages.ghc982.haskell-language-server
+            haskell-language-server
             ghcid
             cabal-install
             cabal-audit
