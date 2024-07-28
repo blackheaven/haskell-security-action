@@ -36,6 +36,7 @@ runs:
         docker run --rm \
           -v ${{ inputs.path }}:/repository \
           ghcr.io/blackheaven/haskell-security-action:latest \
+          /bin/github-action-scan \
           --token ${{ inputs.token }} \
           --owner-repository ${{ inputs.repository }} \
           --ref ${{ inputs.ref }} \
