@@ -1,0 +1,47 @@
+name: Scan code security advisories
+description: Scan Haskell code for possible security advisories.
+
+inputs:
+  path:
+    description: Path of file or directory that will be scanned.
+    required: false
+    default: .
+  token:
+    description: Access token to fetch the repository and write the code scanning results from github-action-scan to GitHub code scanning.
+    required: false
+    default: ${{ github.token }}
+  repository:
+    description: The name of the repository without the .git extension. The name is not case sensitive.
+    required: false
+    default: ${{ github.repository }}
+  ref:
+    description: The full Git reference, formatted as refs/heads/<branch name>, refs/tags/<tag>, refs/pull/<number>/merge, or refs/pull/<number>/head.
+    required: false
+    default: ${{ github.ref }}
+  commitSha:
+    description: The SHA of the commit to which the analysis you are uploading relates.
+    required: false
+    default: ${{ github.sha }}
+
+outputs:
+  sarif-id:
+    description: The ID of the uploaded SARIF file.
+    value: ${{ steps.upload-sarif.outputs.sarif-id }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Run Haskell Security Action"
+      run: |
+        docker run --rm \
+          -v ${{ inputs.path }}:/repository \
+          ghcr.io/blackheaven/haskell-security-action:latest \
+          --token ${{ inputs.token }} \
+          --owner-repository ${{ inputs.repository }} \
+          --ref ${{ inputs.ref }} \
+          --commit-sha ${{ inputs.commitSha }}
+      shell: bash
+
+branding:
+  icon: 'search'
+  color: 'purple'
