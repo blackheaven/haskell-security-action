@@ -10,6 +10,11 @@ source-repository-package
     location: https://github.com/MangoIV/cabal-audit.git
     tag: de80acddb176e150b9f375ead987b32d803aa430
 
+--source-repository-package
+--    type: git
+--    location: https://github.com/haskell/tar.git
+--    tag: 29ac5b50fdcd7ece25cacab42cefb38695994ef2
+
 source-repository-package
     type: git
     location: https://github.com/haskell/security-advisories.git

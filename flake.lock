@@ -251,7 +251,8 @@
         "hydra": "hydra",
         "iserv-proxy": "iserv-proxy",
         "nixpkgs": [
-          "nixpkgs"
+          "haskell-nix",
+          "nixpkgs-unstable"
         ],
         "nixpkgs-2003": "nixpkgs-2003",
         "nixpkgs-2105": "nixpkgs-2105",
@@ -750,21 +751,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1719956923,
-        "narHash": "sha256-nNJHJ9kfPdzYsCOlHOnbiiyKjZUW5sWbwx3cakg3/C4=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "706eef542dec88cc0ed25b9075d3037564b2d164",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "old-ghc-nix": {
       "flake": false,
       "locked": {
@@ -789,7 +775,10 @@
         "git-hooks": "git-hooks",
         "haskell-nix": "haskell-nix",
         "haskell-security-advisories": "haskell-security-advisories",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": [
+          "haskell-nix",
+          "nixpkgs"
+        ]
       }
     },
     "stackage": {

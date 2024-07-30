@@ -20,9 +20,9 @@
     # For trying to hit cache.iog.io one would have
     # to follow haskell.nix's nixpkgs pinned version,
     # but it may be a few months old, so pin it here instead.
-    #nixpkgs.follows = "haskell-nix/nixpkgs";
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    haskell-nix.inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs.follows = "haskell-nix/nixpkgs";
+    #nixpkgs.url = "github:NixOS/nixpkgs";
+    #haskell-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Convenient Nix Flake utilities, like flake-utils.lib.eachSystem.
     flake-utils.url = "github:numtide/flake-utils";
@@ -118,8 +118,9 @@
               #       27|     then ghc.buildGHC
               #         |          ^
               #       28|     else ghc;
-              lib.mapAttrs (name: ghc: ghc // { buildGHC = ghc; })
-              pkgs.haskell.compiler;
+              #lib.mapAttrs (name: ghc: ghc // { buildGHC = ghc; })
+              #  pkgs.haskell.compiler;
+              pkgs.haskell-nix.compiler;
 
             # Pinning the index-state of Hackage,
             # instead of using the latest known by haskell.nix,
@@ -170,25 +171,25 @@
               "https://github.com/MangoIV/cabal-audit.git" = inputs.cabal-audit;
               "https://github.com/haskell/security-advisories.git" =
                 inputs.haskell-security-advisories;
-              #"https://github.com/AccelerateHS/accelerate-llvm.git" = inputs.accelerate-llvm;
-              #"https://github.com/alpmestan/accelerate-arithmetic.git" = applyPatches "accelerate-arithmetic" [
-              #  nix/haskell.nix/patches/accelerate-arithmetic/0001-remove-test-using-removed-realBandedGramian.patch
+              #"https://github.com/haskell/tar.git" = applyPatches "tar" [
+              #  nix/haskell.nix/patches/tar/0001-compatibility-static-build-remove-QuasiQuotes.patch
               #];
             };
 
             # Default project configuration.
             modules = [
-              ({ pkgs, ... }: {
-                # Make the closure dependency significantly larger
-                # but avoid missing genprimopcode with compilerSelection = p: pkgs.haskell.compiler
-                reinstallableLibGhc = false;
+              ({ pkgs, ... }:
+                {
+                  # Make the closure dependency significantly larger
+                  # but avoid missing genprimopcode with compilerSelection = p: pkgs.haskell.compiler
+                  #reinstallableLibGhc = false;
 
-                # Link with OpenBLAS optimized libraries.
-                # WARNING: OpenBLAS must only be used by trusted code
-                # it is inherently unsuitable for security-conscious applications.
-                # See nixpkgs/pkgs/development/libraries/science/math/openblas/default.nix
-                #packages.hmatrix.flags.openblas = true;
-              })
+                  # Link with OpenBLAS optimized libraries.
+                  # WARNING: OpenBLAS must only be used by trusted code
+                  # it is inherently unsuitable for security-conscious applications.
+                  # See nixpkgs/pkgs/development/libraries/science/math/openblas/default.nix
+                  #packages.hmatrix.flags.openblas = true;
+                })
             ];
 
             # Shell configuration shared by the default shell

@@ -52,7 +52,10 @@
 
             # > <no location info>: error:
             # >     Couldn't find a target code interpreter. Try with -fexternal-interpreter
-            packages.tar.ghcOptions = [ "-fexternal-interpreter" ];
+            #packages.tar.ghcOptions = [ "-fexternal-interpreter" ];
+
+            packages.github-action-scan.components.exes.github-action-scan-exe.dontStrip =
+              false;
           })
         ];
 
