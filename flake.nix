@@ -20,9 +20,9 @@
     # For trying to hit cache.iog.io one would have
     # to follow haskell.nix's nixpkgs pinned version,
     # but it may be a few months old, so pin it here instead.
-    nixpkgs.follows = "haskell-nix/nixpkgs";
-    #nixpkgs.url = "github:NixOS/nixpkgs";
-    #haskell-nix.inputs.nixpkgs.follows = "nixpkgs";
+    #nixpkgs.follows = "haskell-nix/nixpkgs";
+    nixpkgs.url = "flake:nixpkgs";
+    haskell-nix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Convenient Nix Flake utilities, like flake-utils.lib.eachSystem.
     flake-utils.url = "github:numtide/flake-utils";
