@@ -25,4 +25,13 @@ jobs:
       shell: bash
       run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF##*/})"
       id: extract_tag
-    - run: nix build -L '.#packages.x86_64-linux.github-action-scan-image'
+    - name: bundle static file
+      run: |
+        nix bundle '.#github-action-scan-static'
+        mv github-action-scan _out
+        cp $(readlink -f _out) github-action-scan
+    - uses: actions/upload-artifact@v4
+      with:
+        name: github-action-scan
+        path: github-action-scan
+

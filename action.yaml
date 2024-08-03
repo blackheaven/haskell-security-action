@@ -31,12 +31,13 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/download-artifact@v4
+      with:
+        repo: blackheaven/haskell-security-action
+        name: github-action-scan
     - name: "Run Haskell Security Action"
       run: |
-        docker run --rm \
-          -v ${{ inputs.path }}:/repository \
-          ghcr.io/blackheaven/haskell-security-action:latest \
-          /bin/github-action-scan \
+        ./github-action-scan \
           --token ${{ inputs.token }} \
           --owner-repository ${{ inputs.repository }} \
           --ref ${{ inputs.ref }} \
