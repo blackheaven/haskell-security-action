@@ -25,6 +25,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - uses: haskell-actions/setup@v2 # GHC is neneded in $PATH
+        with:
+          ghc-version: '9.8'
+
       - name: Run Haskell Security Action
         uses: blackheaven/haskell-security-action@master
         with:
