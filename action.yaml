@@ -36,19 +36,20 @@ runs:
         repo: blackheaven/haskell-security-action
         name: github-action-scan
     - name: Extract
+      shell: bash
       run: |
         docker pull ghcr.io/blackheaven/haskell-security-action
         docker create --name dummy blackheaven/haskell-security-action
         docker cp -L dummy:/bin/github-action-scan github-action-scan
         docker rm -f dummy
     - name: Run Haskell Security Action
+      shell: bash
       run: |
         ./github-action-scan \
           --token ${{ inputs.token }} \
           --owner-repository ${{ inputs.repository }} \
           --ref ${{ inputs.ref }} \
           --commit-sha ${{ inputs.commitSha }}
-      shell: bash
 
 branding:
   icon: 'search'
