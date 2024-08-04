@@ -40,7 +40,7 @@ runs:
     - name: Extract
       shell: bash
       run: |
-        docker pull ghcr.io/blackheaven/haskell-security-action
+        docker pull ghcr.io/blackheaven/haskell-security-action:master
         docker create --name dummy blackheaven/haskell-security-action
         docker cp -L dummy:/bin/github-action-scan github-action-scan
         docker rm -f dummy
