@@ -21,7 +21,19 @@
         gas = haskellPackages.callCabal2nix "github-action-scan" ./. { };
       in rec {
         packages.github-action-scan = gas;
-        packages.github-action-scan-static = pkgs.haskell.lib.justStaticExecutables gas;
+        packages.github-action-scan-image = pkgs.dockerTools.buildImage {
+          name = "blackheaven/haskell-security-action";
+          tag = "latest";
+
+          copyToRoot = pkgs.buildEnv {
+            name = "image-root";
+            paths = [ (pkgs.haskell.lib.justStaticExecutables gas) ];
+            pathsToLink = [ "/bin" "/" ];
+          };
+          config = {
+            Cmd = [ "/bin/only-for-file-transfer" ];
+          };
+        };
 
         defaultPackage = packages.github-action-scan;
 

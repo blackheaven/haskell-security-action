@@ -10,9 +10,9 @@ license-file:        LICENSE
 synopsis:            Scan for vulnerabilities and create advisories on GitHub
 description:         Scan for vulnerabilities and create advisories on GitHub.
 Homepage:            http://github.com/blackheaven/github-action-scan
-tested-with:         GHC==9.8.2
+tested-with:         GHC==9.6.5
 
-executable github-action-scan-exe
+executable github-action-scan
   -- type: exitcode-stdio-1.0
   main-is: Main.hs
   hs-source-dirs: app
