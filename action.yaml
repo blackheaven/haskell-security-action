@@ -43,11 +43,16 @@ runs:
         export IMG=ghcr.io/blackheaven/haskell-security-action:master
         docker pull $IMG
         docker create --name dummy $IMG
+        ls
         docker cp -L dummy:/bin/github-action-scan github-action-scan
+        ls
         docker rm -f dummy
+        pwd
     - name: Run Haskell Security Action
       shell: bash
       run: |
+        pwd
+        ls
         ./github-action-scan \
           --token ${{ inputs.token }} \
           --owner-repository ${{ inputs.repository }} \
