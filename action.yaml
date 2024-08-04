@@ -31,10 +31,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/download-artifact@v4
-      with:
-        repo: blackheaven/haskell-security-action
-        name: github-action-scan
     - name: Extract
       shell: bash
       run: |
