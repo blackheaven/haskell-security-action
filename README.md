@@ -29,13 +29,6 @@ jobs:
         with:
           ghc-version: '9.8'
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Run Haskell Security Action
         uses: blackheaven/haskell-security-action@master
         with:
