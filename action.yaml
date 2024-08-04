@@ -41,7 +41,7 @@ runs:
       shell: bash
       run: |
         docker pull ghcr.io/blackheaven/haskell-security-action:master
-        docker create --name dummy blackheaven/haskell-security-action
+        docker create --name dummy blackheaven/haskell-security-action:master
         docker cp -L dummy:/bin/github-action-scan github-action-scan
         docker rm -f dummy
     - name: Run Haskell Security Action
