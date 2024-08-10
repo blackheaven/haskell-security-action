@@ -357,6 +357,19 @@
         #     $ nix -L build .#github-action-scan:exe:github-action-scan-exe
         packages = projectFlake.packages // {
           weeder-analysis = project.args.weeder.analysis;
+          github-action-scan-image = pkgs.dockerTools.buildImage {
+            name = "blackheaven/haskell-security-action";
+            tag = "latest";
+
+            copyToRoot = pkgs.buildEnv {
+              name = "image-root";
+              paths = [
+                projectFlake.packages."static:github-action-scan:exe:github-action-scan"
+              ];
+              pathsToLink = [ "/bin" ];
+            };
+            config = { Cmd = [ "/bin/only-for-file-transfer" ]; };
+          };
         };
 
         # For entering the default development shell:
@@ -430,10 +443,11 @@
           git-hooks-check = inputs.git-hooks.lib.${system}.run {
             src = ./.;
             hooks = {
-              #cabal-fmt.enable = true;
-              #fourmolu.enable = true;
-              #hlint.enable = true;
-              #nixfmt-rfc-style.enable = true;
+              cabal-fmt.enable = true;
+              ormolu.enable = true;
+              hlint.enable = true;
+              # nixfmt-rfc-style.enable = true;
+              # nixfmt-classic.enable = true;
               nixfmt.enable = true;
             };
           };
