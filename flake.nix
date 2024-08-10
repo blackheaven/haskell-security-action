@@ -364,7 +364,7 @@
             copyToRoot = pkgs.buildEnv {
               name = "image-root";
               paths = [
-                projectFlake.packages."static:github-action-scan:exe:github-action-scan"
+                projectFlake.packages."static-x86_64-unknown-linux-musl:github-action-scan:exe:github-action-scan"
               ];
               pathsToLink = [ "/bin" ];
             };

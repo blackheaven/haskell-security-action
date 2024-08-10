@@ -20,7 +20,7 @@ jobs:
         extra_nix_config: |
           system-features = nixos-test benchmark big-parallel kvm
     - uses: DeterminateSystems/magic-nix-cache-action@main
-    - run: nix build -L
+    - run: nix build -L '.#packages.x86_64-linux."static-x86_64-unknown-linux-musl:github-action-scan:exe:github-action-scan"'
     - run: nix flake check
     - name: Extract tag name
       shell: bash
