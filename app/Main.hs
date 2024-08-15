@@ -7,6 +7,7 @@ import Control.Carrier.Lift (runM)
 import Control.Effect.Pretty (PrettyC, runPretty)
 import Control.Monad.Codensity (Codensity (Codensity))
 import Control.Monad.IO.Class (MonadIO (liftIO))
+import Data.Base64.Types (extractBase64)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
 import Data.ByteString.Lazy.Base64 (encodeBase64)
@@ -183,7 +184,7 @@ sendAdvisories ghContext packageAdvisories = do
             ghData =
               [ "ref" := ghContext.ref,
                 "commit_sha" := ghContext.commitSha,
-                "sharif" := encodeBase64 (compress $ encodeSarifAsLBS defaultLog {logRuns = [run]}),
+                "sharif" := extractBase64 (encodeBase64 $ compress $ encodeSarifAsLBS defaultLog {logRuns = [run]}),
                 "tool_name" := ("github-action-scan" :: Text),
                 "validate" := True
               ]
