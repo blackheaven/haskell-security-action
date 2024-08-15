@@ -183,7 +183,7 @@ sendAdvisories ghContext packageAdvisories = do
             ghData =
               [ "ref" := ghContext.ref,
                 "commit_sha" := ghContext.commitSha,
-                --"sharif" := encodeBase64 (compress $ encodeSarifAsLBS defaultLog {logRuns = [run]}),
+                "sharif" := encodeBase64 (compress $ encodeSarifAsLBS defaultLog {logRuns = [run]}),
                 "tool_name" := ("github-action-scan" :: Text),
                 "validate" := True
               ]
@@ -192,4 +192,4 @@ sendAdvisories ghContext packageAdvisories = do
     -- log to stderr
     liftIO $ hPutStrLn stderr $ "Setting: " ++ kv
     -- output to stdout into $GITHUB_OUTPUT
-    liftIO $ hPutStrLn stdout kv
+    liftIO $ putStrLn kv

@@ -223,8 +223,10 @@
               nativeBuildInputs = [
                 pkgs.haskell.packages.${config.compiler-nix-name}.cabal-install
                 #pkgs.haskell.packages.${config.compiler-nix-name}.ghcid
-                #pkgs.haskell.packages.${config.compiler-nix-name}.haskell-language-server
-                #pkgs.haskell.packages.${config.compiler-nix-name}.hlint
+                pkgs.haskell.packages.${config.compiler-nix-name}.haskell-language-server
+                pkgs.haskell.packages.${config.compiler-nix-name}.hlint
+                pkgs.haskell.packages.${config.compiler-nix-name}.ormolu
+                pkgs.haskell.packages.${config.compiler-nix-name}.cabal-fmt
               ];
 
               shellHook = ''
