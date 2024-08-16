@@ -177,7 +177,7 @@ sendAdvisories ghContext packageAdvisories = do
       queryGitHub
         GHEndpoint
           { method = POST,
-            endpoint = "/repos/:owner/:repo/code-scanning/sarifs",
+            endpoint = "/repos/:repo/code-scanning/sarifs",
             endpointVals =
               [ "repo" := ghContext.ownerRepository
               ],
