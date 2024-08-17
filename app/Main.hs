@@ -168,7 +168,7 @@ sendAdvisories ghContext packageAdvisories = do
         GitHubSettings
           { token = Just $ BearerToken ghContext.token,
             userAgent = "github-action-scan",
-            apiVersion = "v3"
+            apiVersion = "2022-11-28"
           }
 
   runGitHubT ghSettings $ do
