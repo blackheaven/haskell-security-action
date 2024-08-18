@@ -5,7 +5,6 @@ module Main (main) where
 import Control.Carrier.Lift (runM)
 import Control.Effect.Pretty (PrettyC, runPretty)
 import Control.Monad.Codensity (Codensity (Codensity))
-import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Aeson (encodeFile)
 import Data.Coerce
 import Data.Functor.Identity
@@ -14,14 +13,22 @@ import Data.SARIF as Sarif
 import Data.Text (Text)
 import qualified Data.Text as T
 import Distribution.Audit (AuditConfig (..), buildAdvisories)
+import Distribution.Client.DistDirLayout (DistDirLayout (distProjectRootDirectory))
 import Distribution.Client.NixStyleOptions (defaultNixStyleFlags)
+import Distribution.Client.ProjectOrchestration
+  ( CurrentCommand (OtherCommand),
+    ProjectBaseContext (distDirLayout),
+    commandLineFlagsToProjectConfig,
+    establishProjectBaseContext,
+  )
+import Distribution.Client.Setup (defaultGlobalFlags)
 import Distribution.Package (PackageName, unPackageName)
 import qualified Distribution.Verbosity as Verbosity
 import Options.Applicative
 import Security.Advisories
 import Security.Advisories.Cabal
 import Security.Advisories.SBom.Types (prettyVersion)
-import System.IO (hPutStrLn, stderr, stdout)
+import System.IO (stdout)
 import System.Process (readProcess)
 
 main :: IO ()
@@ -33,7 +40,7 @@ main = do
           progDesc "audit your cabal projects for vulnerabilities and generate a sarif file",
           header "Welcome to github-action-scan"
         ]
-  getAdvisories auditConfig >>= sendAdvisories cliOptions
+  getAdvisories auditConfig >>= uncurry (sendAdvisories cliOptions)
 
 newtype CliOptions = CliOptions
   { sarifOutputPath :: FilePath
@@ -75,19 +82,23 @@ cliGithubContextParser =
       ( long "sarif"
           <> metavar "FILE"
           <> help "Sarif output file path"
-          <> value "result.sarif"
+          <> value "results.sarif"
       )
 
-getAdvisories :: AuditConfig -> IO [(PackageName, ElaboratedPackageInfoAdvised)]
+getAdvisories :: AuditConfig -> IO (FilePath, [(PackageName, ElaboratedPackageInfoAdvised)])
 getAdvisories auditConfig = do
   let nixStyleFlags = defaultNixStyleFlags ()
       interpretPretty :: forall m a. PrettyC [Text] m a -> m a
       interpretPretty = runPretty (const id)
+      projectConfig = commandLineFlagsToProjectConfig defaultGlobalFlags nixStyleFlags mempty
 
-  runM $ interpretPretty $ Map.toList <$> buildAdvisories auditConfig nixStyleFlags
+  advisories <- runM $ interpretPretty $ Map.toList <$> buildAdvisories auditConfig nixStyleFlags
+  projectBaseContext <- establishProjectBaseContext Verbosity.normal projectConfig OtherCommand
 
-sendAdvisories :: CliOptions -> [(PackageName, ElaboratedPackageInfoAdvised)] -> IO ()
-sendAdvisories cliOptions packageAdvisories = do
+  return (distProjectRootDirectory $ distDirLayout projectBaseContext, advisories)
+
+sendAdvisories :: CliOptions -> FilePath -> [(PackageName, ElaboratedPackageInfoAdvised)] -> IO ()
+sendAdvisories cliOptions projectRoot packageAdvisories = do
   ghcVersion <- T.pack <$> readProcess "ghc" ["--version"] ""
   let advisories =
         Map.elems $
@@ -133,9 +144,24 @@ sendAdvisories cliOptions packageAdvisories = do
                                         Just fv -> "Fix available since version " <> prettyVersion fv,
                                   [T.intercalate ", " (coerce advisory.advisoryKeywords)]
                                 ],
-                    resultLocations = mempty, -- TODO cabal files/lock?
+                    resultLocations =
+                      [ -- TODO cabal files/lock?
+                        MkLocation $
+                          Just $
+                            MkPhysicalLocation
+                              { physicalLocationArtifactLocation = MkArtifactLocation $ T.pack ("uri:///" <> projectRoot),
+                                physicalLocationRegion = MkRegion 0 0 0 0
+                              }
+                      ],
                     resultLevel = Just Sarif.Error
                   },
-            runArtifacts = mempty -- TODO cabal files/lock?
+            runArtifacts =
+              [ -- TODO cabal files/lock?
+                MkArtifact
+                  { artifactLocation = MkArtifactLocation $ T.pack ("uri:///" <> projectRoot),
+                    artifactMimeType = Nothing
+                  }
+              ]
           }
+  putStrLn $ "Results written at: " <> cliOptions.sarifOutputPath
   encodeFile cliOptions.sarifOutputPath defaultLog {logRuns = [run]}

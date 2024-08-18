@@ -48,12 +48,13 @@ runs:
         CHECKOUT_PATH: ${{ inputs.checkout_path }}
       run: |
         cd "$CHECKOUT_PATH"
-        ./github-action-scan --sarif result.sarif
+        ./github-action-scan --sarif results.sarif
+        cat results.sarif
     - name: Upload SARIF file
       id: upload-sarif
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: ${{ inputs.checkout_path }}/result.sarif
+        sarif_file: ${{ inputs.checkout_path }}/results.sarif
         category: haskell-security-action
         checkout_path: ${{ inputs.checkout_path }}
         ref: ${{ inputs.ref }}
