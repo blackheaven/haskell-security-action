@@ -150,7 +150,7 @@ sendAdvisories cliOptions projectRoot packageAdvisories = do
                           Just $
                             MkPhysicalLocation
                               { physicalLocationArtifactLocation = MkArtifactLocation $ T.pack ("uri:///" <> projectRoot),
-                                physicalLocationRegion = MkRegion 0 0 0 0
+                                physicalLocationRegion = MkRegion 1 1 2 2
                               }
                       ],
                     resultLevel = Just Sarif.Error
