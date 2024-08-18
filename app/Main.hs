@@ -11,12 +11,14 @@ import Data.Base64.Types (extractBase64)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
 import Data.ByteString.Lazy.Base64 (encodeBase64)
+import qualified Data.ByteString.Lazy.Char8 as LB
 import Data.Coerce
 import Data.Functor.Identity
 import qualified Data.Map.Strict as Map
 import Data.SARIF as Sarif
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Text.Lazy.IO as TL
 import Distribution.Audit (AuditConfig (..), buildAdvisories)
 import Distribution.Client.NixStyleOptions (defaultNixStyleFlags)
 import Distribution.Package (PackageName, unPackageName)
@@ -171,9 +173,9 @@ sendAdvisories ghContext packageAdvisories = do
   putStrLn "sarifLog"
   print sarifLog
   putStrLn "lbsSharifLog"
-  B.putStrLn lbsSharifLog
+  LB.putStrLn lbsSharifLog
   putStrLn "base64GzippedSarifLog"
-  B.putStrLn base64GzippedSarifLog
+  TL.putStrLn base64GzippedSarifLog
 
   let ghSettings =
         GitHubSettings
