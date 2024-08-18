@@ -149,7 +149,7 @@ sendAdvisories cliOptions projectRoot packageAdvisories = do
                         MkLocation $
                           Just $
                             MkPhysicalLocation
-                              { physicalLocationArtifactLocation = MkArtifactLocation $ T.pack ("uri:///" <> projectRoot),
+                              { physicalLocationArtifactLocation = MkArtifactLocation $ T.pack ("file:///" <> projectRoot),
                                 physicalLocationRegion = MkRegion 1 1 2 2
                               }
                       ],
@@ -158,7 +158,7 @@ sendAdvisories cliOptions projectRoot packageAdvisories = do
             runArtifacts =
               [ -- TODO cabal files/lock?
                 MkArtifact
-                  { artifactLocation = MkArtifactLocation $ T.pack ("uri:///" <> projectRoot),
+                  { artifactLocation = MkArtifactLocation $ T.pack ("file:///" <> projectRoot),
                     artifactMimeType = Nothing
                   }
               ]
