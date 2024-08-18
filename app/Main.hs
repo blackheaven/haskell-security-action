@@ -7,7 +7,6 @@ import Control.Effect.Pretty (PrettyC, runPretty)
 import Control.Monad.Codensity (Codensity (Codensity))
 import Control.Monad.IO.Class (MonadIO (liftIO))
 import Data.Aeson (encodeFile)
-import Data.ByteString (ByteString)
 import Data.Coerce
 import Data.Functor.Identity
 import qualified Data.Map.Strict as Map
