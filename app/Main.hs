@@ -2,28 +2,22 @@
 
 module Main (main) where
 
-import Codec.Compression.GZip (compress)
 import Control.Carrier.Lift (runM)
 import Control.Effect.Pretty (PrettyC, runPretty)
 import Control.Monad.Codensity (Codensity (Codensity))
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Data.Base64.Types (extractBase64)
+import Data.Aeson (encodeFile)
 import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as B
-import Data.ByteString.Lazy.Base64 (encodeBase64)
-import qualified Data.ByteString.Lazy.Char8 as LB
 import Data.Coerce
 import Data.Functor.Identity
 import qualified Data.Map.Strict as Map
 import Data.SARIF as Sarif
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.Lazy.IO as TL
 import Distribution.Audit (AuditConfig (..), buildAdvisories)
 import Distribution.Client.NixStyleOptions (defaultNixStyleFlags)
 import Distribution.Package (PackageName, unPackageName)
 import qualified Distribution.Verbosity as Verbosity
-import GitHub.REST
 import Options.Applicative
 import Security.Advisories
 import Security.Advisories.Cabal
@@ -33,20 +27,17 @@ import System.Process (readProcess)
 
 main :: IO ()
 main = do
-  (auditConfig, ghContext) <- customExecParser (prefs showHelpOnEmpty) $ do
+  (auditConfig, cliOptions) <- customExecParser (prefs showHelpOnEmpty) $ do
     info (helper <*> ((,) <$> cliAuditParser <*> cliGithubContextParser)) $ do
       mconcat
         [ fullDesc,
-          progDesc "audit your cabal projects for vulnerabilities and upload the result to GitHub",
+          progDesc "audit your cabal projects for vulnerabilities and generate a sarif file",
           header "Welcome to github-action-scan"
         ]
-  getAdvisories auditConfig >>= sendAdvisories ghContext
+  getAdvisories auditConfig >>= sendAdvisories cliOptions
 
-data GitHubContext = GitHubContext
-  { token :: ByteString,
-    ownerRepository :: Text,
-    ref :: Text,
-    commitSha :: Text
+newtype CliOptions = CliOptions
+  { sarifOutputPath :: FilePath
   }
 
 cliAuditParser :: Parser AuditConfig
@@ -78,32 +69,15 @@ cliAuditParser =
     <*> pure False
     <*> pure False
 
-cliGithubContextParser :: Parser GitHubContext
+cliGithubContextParser :: Parser CliOptions
 cliGithubContextParser =
-  GitHubContext
-    <$> byteStringOption
-      ( long "token"
-          <> metavar "TOKEN"
-          <> help "GitHub API token"
+  CliOptions
+    <$> strOption
+      ( long "sarif"
+          <> metavar "FILE"
+          <> help "Sarif output file path"
+          <> value "result.sarif"
       )
-    <*> textOption
-      ( long "owner-repository"
-          <> metavar "REPOSITORY"
-          <> help "Repository name"
-      )
-    <*> textOption
-      ( long "ref"
-          <> metavar "REF"
-          <> help "Git reference"
-      )
-    <*> textOption
-      ( long "commit-sha"
-          <> metavar "COMMIT_SHA"
-          <> help "Commit SHA"
-      )
-  where
-    byteStringOption mod' = B.pack <$> strOption mod'
-    textOption mod' = T.pack <$> strOption mod'
 
 getAdvisories :: AuditConfig -> IO [(PackageName, ElaboratedPackageInfoAdvised)]
 getAdvisories auditConfig = do
@@ -113,8 +87,8 @@ getAdvisories auditConfig = do
 
   runM $ interpretPretty $ Map.toList <$> buildAdvisories auditConfig nixStyleFlags
 
-sendAdvisories :: GitHubContext -> [(PackageName, ElaboratedPackageInfoAdvised)] -> IO ()
-sendAdvisories ghContext packageAdvisories = do
+sendAdvisories :: CliOptions -> [(PackageName, ElaboratedPackageInfoAdvised)] -> IO ()
+sendAdvisories cliOptions packageAdvisories = do
   ghcVersion <- T.pack <$> readProcess "ghc" ["--version"] ""
   let advisories =
         Map.elems $
@@ -165,45 +139,4 @@ sendAdvisories ghContext packageAdvisories = do
                   },
             runArtifacts = mempty -- TODO cabal files/lock?
           }
-      sarifLog = defaultLog {logRuns = [run]}
-      lbsSharifLog = encodeSarifAsLBS sarifLog
-      gzippedsharifLog = compress lbsSharifLog
-      base64GzippedSarifLog = extractBase64 $ encodeBase64 gzippedsharifLog
-
-  putStrLn "sarifLog"
-  print sarifLog
-  putStrLn "lbsSharifLog"
-  LB.putStrLn lbsSharifLog
-  putStrLn "base64GzippedSarifLog"
-  TL.putStrLn base64GzippedSarifLog
-
-  let ghSettings =
-        GitHubSettings
-          { token = Just $ BearerToken ghContext.token,
-            userAgent = "github-action-scan",
-            apiVersion = "2022-11-28"
-          }
-
-  runGitHubT ghSettings $ do
-    -- https://docs.github.com/en/rest/code-scanning/code-scanning?apiVersion=2022-11-28#upload-an-analysis-as-sarif-data
-    sarif <-
-      queryGitHub
-        GHEndpoint
-          { method = POST,
-            endpoint = "/repos/:repo/code-scanning/sarifs",
-            endpointVals =
-              [ "repo" := ghContext.ownerRepository
-              ],
-            ghData =
-              [ "ref" := ghContext.ref,
-                "commit_sha" := ghContext.commitSha,
-                "sarif" := base64GzippedSarifLog,
-                "tool_name" := ("github-action-scan" :: Text),
-                "validate" := True
-              ]
-          }
-    let kv = "sarif-id=" <> (sarif .: "id")
-    -- log to stderr
-    liftIO $ hPutStrLn stderr $ "Setting: " ++ kv
-    -- output to stdout into $GITHUB_OUTPUT
-    liftIO $ putStrLn kv
+  encodeFile cliOptions.sarifOutputPath defaultLog {logRuns = [run]}

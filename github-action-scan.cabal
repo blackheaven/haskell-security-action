@@ -44,16 +44,14 @@ executable github-action-scan
     -Wpartial-fields -Wredundant-constraints
 
   build-depends:
+    , aeson
     , base
-    , base64
-    , bytestring
     , Cabal
     , cabal-audit
     , cabal-install
     , Cabal-syntax
     , containers
     , fused-effects
-    , github-rest
     , hsec-tools
     , http-types
     , kan-extensions
@@ -61,6 +59,5 @@ executable github-action-scan
     , process
     , sarif
     , text
-    , zlib
 
   default-language:   Haskell2010

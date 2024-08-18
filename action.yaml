@@ -2,26 +2,20 @@ name: Scan code security advisories
 description: Scan Haskell code for possible security advisories.
 
 inputs:
-  path:
-    description: Path of file or directory that will be scanned.
+  checkout_path:
+    description: "The path at which the analyzed repository was checked out. Used to relativize any absolute paths in the uploaded SARIF file."
     required: false
-    default: .
+    default: ${{ github.workspace }}
+  ref:
+    description: "The ref where results will be uploaded. If not provided, the Action will use the GITHUB_REF environment variable. If provided, the sha input must be provided as well. This input is ignored for pull requests from forks."
+    required: false
+  sha:
+    description: "The sha of the HEAD of the ref where results will be uploaded. If not provided, the Action will use the GITHUB_SHA environment variable. If provided, the ref input must be provided as well. This input is ignored for pull requests from forks."
+    required: false
   token:
-    description: Access token to fetch the repository and write the code scanning results from github-action-scan to GitHub code scanning.
+    description: "GitHub token to use for authenticating with this instance of GitHub. The token needs the `security-events: write` permission."
     required: false
     default: ${{ github.token }}
-  repository:
-    description: The name of the repository without the .git extension. The name is not case sensitive.
-    required: false
-    default: ${{ github.repository }}
-  ref:
-    description: The full Git reference, formatted as refs/heads/<branch name>, refs/tags/<tag>, refs/pull/<number>/merge, or refs/pull/<number>/head.
-    required: false
-    default: ${{ github.ref }}
-  commitSha:
-    description: The SHA of the commit to which the analysis you are uploading relates.
-    required: false
-    default: ${{ github.sha }}
 
 outputs:
   sarif-id:
@@ -39,7 +33,10 @@ runs:
         password: ${{ inputs.token }}
     - name: Extract
       shell: bash
+      env:
+        CHECKOUT_PATH: ${{ inputs.checkout_path }}
       run: |
+        cd "$CHECKOUT_PATH"
         export IMG=ghcr.io/blackheaven/haskell-security-action:master
         docker pull $IMG
         docker create --name dummy $IMG
@@ -47,13 +44,21 @@ runs:
         docker rm -f dummy
     - name: Run Haskell Security Action
       shell: bash
+      env:
+        CHECKOUT_PATH: ${{ inputs.checkout_path }}
       run: |
-        ls -l  github-action-scan
-        ./github-action-scan \
-          --token ${{ inputs.token }} \
-          --owner-repository ${{ inputs.repository }} \
-          --ref ${{ inputs.ref }} \
-          --commit-sha ${{ inputs.commitSha }}
+        cd "$CHECKOUT_PATH"
+        ./github-action-scan --sarif result.sarif
+    - name: Upload SARIF file
+      id: upload-sarif
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.checkout_path }}/result.sarif
+        category: haskell-security-action
+        checkout_path: ${{ inputs.checkout_path }}
+        ref: ${{ inputs.ref }}
+        sha: ${{ inputs.sha }}
+        token: ${{ inputs.token }}
 
 branding:
   icon: 'search'
