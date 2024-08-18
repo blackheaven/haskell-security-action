@@ -163,6 +163,17 @@ sendAdvisories ghContext packageAdvisories = do
                   },
             runArtifacts = mempty -- TODO cabal files/lock?
           }
+      sarifLog = defaultLog {logRuns = [run]}
+      lbsSharifLog = encodeSarifAsLBS sarifLog
+      gzippedsharifLog = compress lbsSharifLog
+      base64GzippedSarifLog = extractBase64 $ encodeBase64 gzippedsharifLog
+
+  putStrLn "sarifLog"
+  print sarifLog
+  putStrLn "lbsSharifLog"
+  B.putStrLn lbsSharifLog
+  putStrLn "base64GzippedSarifLog"
+  B.putStrLn base64GzippedSarifLog
 
   let ghSettings =
         GitHubSettings
@@ -184,7 +195,7 @@ sendAdvisories ghContext packageAdvisories = do
             ghData =
               [ "ref" := ghContext.ref,
                 "commit_sha" := ghContext.commitSha,
-                "sarif" := extractBase64 (encodeBase64 $ compress $ encodeSarifAsLBS defaultLog {logRuns = [run]}),
+                "sarif" := base64GzippedSarifLog,
                 "tool_name" := ("github-action-scan" :: Text),
                 "validate" := True
               ]
