@@ -184,7 +184,7 @@ sendAdvisories ghContext packageAdvisories = do
             ghData =
               [ "ref" := ghContext.ref,
                 "commit_sha" := ghContext.commitSha,
-                "sharif" := extractBase64 (encodeBase64 $ compress $ encodeSarifAsLBS defaultLog {logRuns = [run]}),
+                "sarif" := extractBase64 (encodeBase64 $ compress $ encodeSarifAsLBS defaultLog {logRuns = [run]}),
                 "tool_name" := ("github-action-scan" :: Text),
                 "validate" := True
               ]
