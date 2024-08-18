@@ -21,6 +21,8 @@ on:
 jobs:
   haskell-security:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
