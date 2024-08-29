@@ -25,30 +25,20 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Log in to the Container registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ inputs.token }}
     - name: Extract
       shell: bash
       env:
         CHECKOUT_PATH: ${{ inputs.checkout_path }}
       run: |
         cd "$CHECKOUT_PATH"
-        export IMG=ghcr.io/blackheaven/haskell-security-action:master
-        docker pull $IMG
-        docker create --name dummy $IMG
-        docker cp -L dummy:/bin/github-action-scan github-action-scan
-        docker rm -f dummy
+        wget https://github.com/blackheaven/cabal-audit/releases/download/nightly/cabal-audit
     - name: Run Haskell Security Action
       shell: bash
       env:
         CHECKOUT_PATH: ${{ inputs.checkout_path }}
       run: |
         cd "$CHECKOUT_PATH"
-        ./github-action-scan --sarif results.sarif
+        ./cabal-audit --sarif | tee results.sarif
         cat results.sarif
     - name: Upload SARIF file
       id: upload-sarif
