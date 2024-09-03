@@ -32,6 +32,7 @@ runs:
       run: |
         cd "$CHECKOUT_PATH"
         wget https://github.com/blackheaven/cabal-audit/releases/download/nightly/cabal-audit
+        chmod +x cabal-audit
     - name: Run Haskell Security Action
       shell: bash
       env:
