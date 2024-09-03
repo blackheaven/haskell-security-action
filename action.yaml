@@ -40,7 +40,6 @@ runs:
       run: |
         cd "$CHECKOUT_PATH"
         ./cabal-audit --sarif | tee results.sarif
-        cat results.sarif
     - name: Upload SARIF file
       id: upload-sarif
       uses: github/codeql-action/upload-sarif@v3
