@@ -31,7 +31,7 @@ runs:
         CHECKOUT_PATH: ${{ inputs.checkout_path }}
       run: |
         cd "$CHECKOUT_PATH"
-        wget https://github.com/blackheaven/cabal-audit/releases/download/nightly/cabal-audit
+        wget https://github.com/MangoIV/cabal-audit/releases/download/nightly/cabal-audit
         chmod +x cabal-audit
     - name: Run Haskell Security Action
       shell: bash
@@ -53,5 +53,5 @@ runs:
         token: ${{ inputs.token }}
 
 branding:
-  icon: 'search'
-  color: 'purple'
+  icon: "search"
+  color: "purple"
