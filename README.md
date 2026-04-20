@@ -27,7 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: haskell-actions/setup@v2 # GHC is neneded in $PATH
+      - uses: haskell-actions/setup@v2 # GHC is needed in $PATH
         with:
           ghc-version: '9.8'
 
