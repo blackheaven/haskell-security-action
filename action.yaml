@@ -16,6 +16,10 @@ inputs:
     description: "GitHub token to use for authenticating with this instance of GitHub. The token needs the `security-events: write` permission."
     required: false
     default: ${{ github.token }}
+  enrich-sarif:
+    description: "Enrich cabal-audit SARIF with dependency paths from Cabal plan.json using cabal-plan-submit."
+    required: false
+    default: "true"
 
 outputs:
   sarif-id:
@@ -29,17 +33,40 @@ runs:
       shell: bash
       env:
         CHECKOUT_PATH: ${{ inputs.checkout_path }}
+        ENRICH_SARIF: ${{ inputs.enrich-sarif }}
       run: |
+        set -euo pipefail
         cd "$CHECKOUT_PATH"
         wget https://github.com/MangoIV/cabal-audit/releases/download/nightly/cabal-audit
         chmod +x cabal-audit
+        if [[ "$ENRICH_SARIF" == "true" ]]; then
+          cabal update
+          cabal install cabal-plan-submit \
+            --installdir "$RUNNER_TEMP/bin" \
+            --overwrite-policy=always
+        fi
     - name: Run Haskell Security Action
       shell: bash
       env:
         CHECKOUT_PATH: ${{ inputs.checkout_path }}
+        ENRICH_SARIF: ${{ inputs.enrich-sarif }}
       run: |
+        set -euo pipefail
         cd "$CHECKOUT_PATH"
-        ./cabal-audit --sarif --to-file results.sarif
+        ./cabal-audit --sarif --to-file cabal-audit.sarif
+        if [[ "$ENRICH_SARIF" == "true" ]]; then
+          cabal build all --dry-run
+          if [[ ! -f dist-newstyle/cache/plan.json ]]; then
+            echo "Expected dist-newstyle/cache/plan.json after cabal build all --dry-run"
+            exit 1
+          fi
+          "$RUNNER_TEMP/bin/cabal-plan-submit" enrich-sarif \
+            dist-newstyle/cache/plan.json \
+            cabal-audit.sarif \
+            > results.sarif
+        else
+          cp cabal-audit.sarif results.sarif
+        fi
         cat results.sarif
     - name: Upload SARIF file
       id: upload-sarif
