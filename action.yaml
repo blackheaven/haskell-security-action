@@ -2,6 +2,10 @@ name: Scan code security advisories
 description: Scan Haskell code for possible security advisories.
 
 inputs:
+  binary_url:
+    description: "URL of the cabal-audit binary to download. Must be a linux x86-64 executable that runs on the runner."
+    required: false
+    default: "https://github.com/MangoIV/cabal-audit/releases/download/nightly/cabal-audit"
   checkout_path:
     description: "The path at which the analyzed repository was checked out. Used to relativize any absolute paths in the uploaded SARIF file."
     required: false
@@ -29,9 +33,10 @@ runs:
       shell: bash
       env:
         CHECKOUT_PATH: ${{ inputs.checkout_path }}
+        BINARY_URL: ${{ inputs.binary_url }}
       run: |
         cd "$CHECKOUT_PATH"
-        wget https://github.com/MangoIV/cabal-audit/releases/download/nightly/cabal-audit
+        wget "$BINARY_URL" -O cabal-audit
         chmod +x cabal-audit
     - name: Run Haskell Security Action
       shell: bash
