@@ -33,6 +33,9 @@ jobs:
 
       - name: Run Haskell Security Action
         uses: blackheaven/haskell-security-action@master
+        # optional: override the cabal-audit binary location
+        # with:
+        #   binary_url: https://github.com/MangoIV/cabal-audit/releases/download/nightly/cabal-audit
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
